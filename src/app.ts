@@ -25,7 +25,12 @@ const app = express();
 // 1. Create a single HTTP server (Express + HTTP)
 const server = createServer(app);
 
-SocketService.getInstance().init(server);
+// Skip Socket.io in Vercel (Serverless)
+if (!process.env.VERCEL) {
+  SocketService.getInstance().init(server);
+} else {
+  console.log("⚠️ Vercel environment detected: Socket.io skipped.");
+}
 
 app.use("/payments", paymentRoutes);
 // 3. Express Global Middleware

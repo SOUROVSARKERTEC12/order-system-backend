@@ -80,6 +80,10 @@ class SocketService {
   }
 
   public emitOrderUpdate(userId: string, orderId: string, status: string) {
+    if (!this.io) {
+      console.warn("⚠️ Socket.IO not initialized, skipping order update emit.");
+      return;
+    }
     this.getIo().to(userId).emit("orderUpdate", { userId, orderId, status });
   }
 }

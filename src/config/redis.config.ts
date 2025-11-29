@@ -1,24 +1,35 @@
 import Redis from "ioredis";
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD || undefined,
-  db: Number(process.env.REDIS_DB) || 0,
-  maxRetriesPerRequest: null,
-  // Optional good defaults
-  retryStrategy(times) {
-    // reconnect after
-    return Math.min(times * 50, 2000);
-  },
-});
+const getRedisConfig = () => {
+  if (!process.env.REDIS_HOST) {
+    console.warn("⚠️ REDIS_HOST not defined, using fallback (localhost)");
+  }
+  return {
+    host: process.env.REDIS_HOST || "localhost",
+    port: Number(process.env.REDIS_PORT) || 6379,
+    password: process.env.REDIS_PASSWORD || undefined,
+    db: Number(process.env.REDIS_DB) || 0,
+    maxRetriesPerRequest: null,
+    lazyConnect: true, // Important for serverless
+    retryStrategy(times: number) {
+      return Math.min(times * 50, 2000);
+    },
+  };
+};
+
+const redis = new Redis(getRedisConfig());
 
 redis.on("connect", () => {
   console.log("✅ Redis connected");
 });
 
 redis.on("error", (err) => {
-  console.error("❌ Redis connection error:", err);
+  // Suppress error logs in Vercel if it's just connection failure
+  if (process.env.VERCEL) {
+    console.warn("⚠️ Redis connection failed (expected in Vercel)");
+  } else {
+    console.error("❌ Redis connection error:", err);
+  }
 });
 
 export default redis;

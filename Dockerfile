@@ -22,7 +22,7 @@ WORKDIR /app
 
 # Install only production dependencies
 COPY package.json yarn.lock ./
-RUN yarn install --production --frozen-lockfile
+RUN yarn install --frozen-lockfile
 
 # Copy built assets + Prisma client
 COPY --from=builder /app/dist ./dist

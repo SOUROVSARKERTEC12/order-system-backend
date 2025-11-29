@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema 
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Define enums
+enum Role {
+  user
+  admin
+}
+
+enum PaymentMethod {
+  stripe
+  paypal
+}
+
+enum PaymentStatus {
+  pending
+  paid
+  failed
+}
+
+enum OrderStatus {
+  pending
+  processing
+  shipped
+  delivered
+  cancelled
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(user) // Use the Role enum
+  orders    Order[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id            String      @id @default(uuid())
+  serialNumber  Int         @default(autoincrement())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  items         Json
+  totalAmount   Float
+  paymentMethod PaymentMethod @default(stripe) // Use the PaymentMethod enum
+  paymentStatus PaymentStatus @default(pending) // Use the PaymentStatus enum
+  orderStatus   OrderStatus @default(pending) // Use the OrderStatus enum
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}

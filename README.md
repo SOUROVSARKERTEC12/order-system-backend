@@ -92,7 +92,77 @@ Create a `.env` file in the root directory. **Do not commit this file to version
 
 ---
 
-## 📡 API Documentation
+## � API Documentation with Swagger
+
+### Overview
+This project uses **Swagger (OpenAPI 3.0)** to provide interactive API documentation. Swagger UI allows you to explore, test, and understand all available API endpoints without writing any code.
+
+### Accessing Swagger UI
+Once the server is running, navigate to:
+```
+http://localhost:3000/api-docs
+```
+
+Or in production:
+```
+https://your-domain.com/api-docs
+```
+
+### Features
+- **Interactive API Testing**: Test endpoints directly from your browser
+- **JWT Authentication**: Click "Authorize" button and enter your bearer token
+- **Request/Response Examples**: See sample payloads and responses for each endpoint
+- **Auto-generated Documentation**: Automatically updated based on route annotations
+
+### Using Swagger UI
+
+#### 1. Authentication Flow
+1. Navigate to `/api-docs`
+2. Find the **POST /auth/login** endpoint
+3. Click "Try it out"
+4. Enter credentials:
+   ```json
+   {
+     "email": "user@example.com",
+     "password": "Password123!"
+   }
+   ```
+5. Click "Execute"
+6. Copy the `token` from the response
+7. Click the **Authorize** button at the top
+8. Enter: `Bearer <your-token>`
+9. Click "Authorize" - now you can access protected endpoints
+
+#### 2. Testing Protected Endpoints
+After authentication:
+- All requests will automatically include your JWT token
+- Green lock icons indicate authenticated endpoints
+- Test order creation, retrieval, and updates
+
+### Configuration
+Swagger is configured in [`swagger.config.ts`](file:///h:/order-system-backend/src/config/swagger.config.ts):
+- **OpenAPI Version**: 3.0.0
+- **Security Schemes**: Bearer JWT Authentication
+- **Request/Response Schemas**: Fully typed with validation rules
+
+### Customization
+To add documentation for new endpoints, use JSDoc comments in your route files:
+```typescript
+/**
+ * @swagger
+ * /your-endpoint:
+ *   get:
+ *     summary: Your endpoint description
+ *     tags: [YourTag]
+ *     responses:
+ *       200:
+ *         description: Success
+ */
+```
+
+---
+
+## 📡 API Endpoints Reference
 
 ### Authentication
 
@@ -219,7 +289,190 @@ Webhooks are used to receive real-time payment updates from Stripe and PayPal.
 
 ---
 
-## 📂 Folder Structure
+## � Real-time Communication with Socket.io
+
+### Overview
+**Socket.io** is integrated to provide real-time, bidirectional communication between the server and connected clients. This enables instant order status updates, notifications, and live data synchronization without polling.
+
+### Connection Setup
+
+#### Server Configuration
+The Socket.io server is initialized in [`app.ts`](file:///h:/order-system-backend/src/app.ts#L30) and managed by the `SocketService` singleton located in [`socket.service.ts`](file:///h:/order-system-backend/src/socket/socket.service.ts).
+
+```typescript
+import { SocketService } from './socket/socket.service';
+
+// Initialize Socket.io with the HTTP server
+SocketService.getInstance().init(server);
+```
+
+#### Client Connection
+Connect from your frontend application:
+
+```javascript
+import { io } from 'socket.io-client';
+
+// Development
+const socket = io('http://localhost:3000');
+
+// Production
+const socket = io('https://order-system-backend-nqi8.onrender.com');
+
+// With authentication (recommended)
+const socket = io('http://localhost:3000', {
+  auth: {
+    token: 'your-jwt-token'
+  }
+});
+
+// Connection events
+socket.on('connect', () => {
+  console.log('Connected to server:', socket.id);
+});
+
+socket.on('disconnect', () => {
+  console.log('Disconnected from server');
+});
+```
+
+### Real-time Events
+
+#### 1. Order Status Updates
+When an order status changes (via admin action or payment webhook), all connected clients receive updates:
+
+**Server Emission** (from backend):
+```typescript
+SocketService.getInstance().emitOrderUpdate(orderId, {
+  orderId: 'uuid',
+  status: 'processing',
+  updatedAt: new Date().toISOString()
+});
+```
+
+**Client Listener** (in frontend):
+```javascript
+socket.on('orderUpdate', (data) => {
+  console.log('Order updated:', data);
+  // Update UI with new status
+  updateOrderUI(data.orderId, data.status);
+});
+```
+
+#### 2. Payment Confirmations
+Real-time payment success/failure notifications:
+
+**Client Listener**:
+```javascript
+socket.on('paymentSuccess', (data) => {
+  console.log('Payment confirmed:', data);
+  showSuccessNotification(data.orderId, data.amount);
+});
+
+socket.on('paymentFailed', (data) => {
+  console.log('Payment failed:', data);
+  showErrorNotification(data.message);
+});
+```
+
+#### 3. Custom Events
+**Emitting from Client**:
+```javascript
+// Join a specific order room
+socket.emit('joinOrder', { orderId: 'abc-123' });
+
+// Leave an order room
+socket.emit('leaveOrder', { orderId: 'abc-123' });
+```
+
+**Server-side Room Management**:
+```typescript
+socket.on('joinOrder', ({ orderId }) => {
+  socket.join(`order:${orderId}`);
+});
+
+// Emit to specific room
+io.to(`order:${orderId}`).emit('orderUpdate', data);
+```
+
+### Testing Socket.io Connections
+
+#### Method 1: Browser Console
+1. Open your frontend application
+2. Open browser DevTools (F12)
+3. Go to Console tab
+4. Test connection:
+   ```javascript
+   const socket = io('http://localhost:3000');
+   socket.on('connect', () => console.log('Connected'));
+   socket.on('orderUpdate', (data) => console.log(data));
+   ```
+
+#### Method 2: Postman (WebSocket Support)
+1. Open Postman
+2. Create a new **WebSocket Request**
+3. Enter URL: `ws://localhost:3000`
+4. Click "Connect"
+5. Listen for events or send custom events
+
+#### Method 3: Socket.io Client Test Tool
+```bash
+npm install -g socket.io-client-test
+socket-test http://localhost:3000
+```
+
+### Use Cases
+
+| Use Case | Event Name | Description |
+| :--- | :--- | :--- |
+| Order placed | `orderCreated` | Notify admins of new orders |
+| Status change | `orderUpdate` | Real-time status updates to users |
+| Payment success | `paymentSuccess` | Instant payment confirmation |
+| Payment failure | `paymentFailed` | Alert user of payment issues |
+| Admin broadcast | `announcement` | Send messages to all connected users |
+
+### Security Considerations
+
+1. **Authentication**: Implement token-based authentication for Socket.io connections
+   ```typescript
+   io.use((socket, next) => {
+     const token = socket.handshake.auth.token;
+     if (isValidToken(token)) {
+       next();
+     } else {
+       next(new Error('Authentication error'));
+     }
+   });
+   ```
+
+2. **Rate Limiting**: Prevent socket spam with rate limits
+3. **Room Isolation**: Users should only join rooms for their own orders
+4. **CORS Configuration**: Properly configure allowed origins
+
+### Deployment Notes
+
+- **Sticky Sessions**: Enable sticky sessions when deploying with multiple instances
+- **Redis Adapter**: For horizontal scaling, use the Redis adapter:
+  ```typescript
+  import { createAdapter } from '@socket.io/redis-adapter';
+  io.adapter(createAdapter(redisClient, redisClient.duplicate()));
+  ```
+- **Health Checks**: Render and other platforms support Socket.io natively with WebSocket support
+
+### Troubleshooting
+
+**Connection Issues**:
+- Verify CORS settings allow your frontend origin
+- Check firewall rules allow WebSocket connections (port 3000)
+- Ensure no reverse proxy is blocking WebSocket upgrades
+
+**Events Not Received**:
+- Confirm client is listening to correct event names (case-sensitive)
+- Check server logs to verify events are being emitted
+- Verify user is in the correct room (if using rooms)
+
+---
+
+## �📂 Folder Structure
 
 ```
 src/
@@ -293,4 +546,5 @@ Live link : https://order-system-backend-nqi8.onrender.com/
 
 -   **Rate Limiting**: Global rate limiting is enabled (100 requests per 15 mins) to prevent abuse.
 -   **Error Handling**: Centralized error handling middleware ensures consistent JSON error responses.
--   **Socket.io**: Ensure your frontend client connects to the same port as the backend for real-time events.
+-   **Socket.io**: For detailed real-time features and event handling, see [Real-time Communication with Socket.io](#-real-time-communication-with-socketio).
+-   **API Documentation**: Interactive Swagger UI is available at `/api-docs` for testing and exploring all endpoints.

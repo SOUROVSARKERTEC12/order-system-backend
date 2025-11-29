@@ -80,7 +80,6 @@ class SocketService {
   }
 
   public emitOrderUpdate(userId: string, orderId: string, status: string) {
-    console.log({ userId, orderId, status });
     this.getIo().to(userId).emit("orderUpdate", { userId, orderId, status });
   }
 }

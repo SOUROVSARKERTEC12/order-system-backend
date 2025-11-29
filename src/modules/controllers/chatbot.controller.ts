@@ -37,15 +37,12 @@ export const history = async (
 ) => {
   try {
 
-    console.log("Calll ..............0")
     const user = (req as any).user;
 
     if (!user || user.role !== "admin") {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-
-    console.log("Calll ..............1")
     // Get global chat history
     const history = await CacheService.getChatHistory();
 

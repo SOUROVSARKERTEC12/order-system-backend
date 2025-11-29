@@ -15,6 +15,7 @@ import chatbotRoutes from "./routes/chatbot.routes";
 import { errorHandler } from "./utils/error.handler";
 import { SocketService } from "./socket/socket.service";
 import "./queues/email.worker";
+import { globalRateLimiter } from "./middlewares/rateLimit.middleware";
 
 // Redis connection
 import "./config/redis.config";
@@ -32,7 +33,7 @@ app.use(express.json());
 app.use(cors());
 app.use(helmet());
 app.use(morgan("combined"));
-
+app.use(globalRateLimiter);
 // 4. API Routes
 app.use("/auth", authRoutes);
 app.use("/orders", orderRoutes);

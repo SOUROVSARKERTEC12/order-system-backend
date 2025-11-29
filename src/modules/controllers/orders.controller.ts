@@ -18,6 +18,8 @@ export const createOrder = async (
     const data = createOrderSchema.parse(req.body);
     const result = await orderService.createOrder(userId, data);
     res.status(201).json({ status: "success", data: result });
+
+    await orderService.orderEmail(result.order.id);
   } catch (error) {
     next(error);
   }

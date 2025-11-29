@@ -11,6 +11,7 @@ import {
 import { PaymentService } from "./payment.service";
 import { PaginationOptions } from "../../interfaces/pagination.interface";
 import { CacheService } from "../../utils/cache.server";
+import { EmailService } from "./email.service";
 
 export class OrderService {
   constructor(private paymentService: PaymentService) {}
@@ -88,6 +89,11 @@ export class OrderService {
       data.paymentFlow
     );
 
+    if (data.paymentFlow == PaymentFlow.BACKEND) {
+      order.paymentStatus = PaymentStatus.Paid;
+      order.orderStatus = OrderStatus.Processing;
+    }
+
     return { order, paymentDetails };
   }
 
@@ -98,7 +104,7 @@ export class OrderService {
     const cacheKey = `orders:${userId}`;
     const cached = await CacheService.get(cacheKey);
     if (cached) {
-      console.log("Get From Cache")
+      console.log("Get From Cache");
       return cached;
     }
 
@@ -151,5 +157,59 @@ export class OrderService {
     );
 
     return updatedOrder;
+  }
+
+  /**
+   * Send order email to user
+   */
+  async orderEmail(orderId: string) {
+    // 1️⃣ Get order with user info
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: { user: true },
+    });
+
+    if (!order) {
+      throw new AppError("Order not found", 404);
+    }
+
+    const userEmail = order.user?.email;
+    if (!userEmail) {
+      throw new AppError("User email not found", 400);
+    }
+
+    // 2️⃣ Cast items JSON safely
+    const items =
+      (order.items as { title: string; price: number; quantity: number }[]) ??
+      [];
+
+    const itemsHtml = items.length
+      ? items
+          .map(
+            (item) =>
+              `<li>${item.title} x ${item.quantity} - $${item.price}</li>`
+          )
+          .join("")
+      : "<li>No items found in this order.</li>";
+
+    const html = `
+    <h2>Hi ${order.user?.email}</h2>
+    <p>Thank you for your order. Here are your order details:</p>
+    <ul>
+      ${itemsHtml}
+    </ul>
+    <p>Total Amount: $${order.totalAmount}</p>
+    <p>Payment Status: ${order.paymentStatus}</p>
+    <p>Order Status: ${order.orderStatus}</p>
+  `;
+
+    // 3️⃣ Send email
+    await EmailService.sendEmail({
+      to: userEmail,
+      subject: `Your Order #${order.id} is ${order.orderStatus}`,
+      html,
+    });
+
+    return { success: true, message: `Email sent to ${userEmail}` };
   }
 }

@@ -1,6 +1,7 @@
 # Stage 1: Build
 FROM node:22-alpine AS builder
 
+# Set working directory
 WORKDIR /app
 
 # Install dependencies
@@ -10,10 +11,8 @@ RUN yarn install --frozen-lockfile
 # Copy source code
 COPY . .
 
-# Build TypeScript
+# Build TypeScript and generate Prisma client
 RUN yarn build
-
-# Generate Prisma client
 RUN npx prisma generate
 
 # Stage 2: Production
@@ -21,13 +20,17 @@ FROM node:22-alpine AS production
 
 WORKDIR /app
 
-# Copy built assets + node_modules
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/prisma ./prisma
+# Install only production dependencies
 COPY package.json yarn.lock ./
+RUN yarn install --production --frozen-lockfile
 
+# Copy built assets + Prisma client
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules ./node_modules
+
+# Expose the port your app runs on
 EXPOSE 3000
 
-# Only start the app
+# Start the app
 CMD ["node", "dist/index.js"]

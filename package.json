@@ -24,6 +24,8 @@
     "@types/node": "^24.10.1",
     "@types/nodemailer": "^7.0.4",
     "@types/pg": "^8.15.6",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
@@ -49,6 +51,8 @@
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "stripe": "^20.0.0",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.13"
   }
 }

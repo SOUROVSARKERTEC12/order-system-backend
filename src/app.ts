@@ -19,6 +19,8 @@ import { globalRateLimiter } from "./middlewares/rateLimit.middleware";
 
 // Redis connection
 import "./config/redis.config";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.config";
 
 const app = express();
 
@@ -38,6 +40,7 @@ app.use(globalRateLimiter);
 app.use("/auth", authRoutes);
 app.use("/orders", orderRoutes);
 app.use("/chatbot", chatbotRoutes);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Basic Health Check Route
 app.get("/", (req, res) => {

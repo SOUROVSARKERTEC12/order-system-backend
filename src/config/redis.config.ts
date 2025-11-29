@@ -5,7 +5,7 @@ const redis = new Redis({
   port: Number(process.env.REDIS_PORT),
   password: process.env.REDIS_PASSWORD || undefined,
   db: Number(process.env.REDIS_DB) || 0,
-
+  maxRetriesPerRequest: null,
   // Optional good defaults
   retryStrategy(times) {
     // reconnect after

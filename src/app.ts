@@ -14,6 +14,7 @@ import chatbotRoutes from "./routes/chatbot.routes";
 // Import Utils & Middlewares
 import { errorHandler } from "./utils/error.handler";
 import { SocketService } from "./socket/socket.service";
+import "./queues/email.worker";
 
 // Redis connection
 import "./config/redis.config";

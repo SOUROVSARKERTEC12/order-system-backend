@@ -23,6 +23,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
     "@types/node": "^24.10.1",
+    "@types/nodemailer": "^7.0.4",
     "nodemon": "^3.1.11",
     "prisma": "5",
     "rimraf": "^6.1.2",
@@ -33,6 +34,7 @@
   "dependencies": {
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
+    "bullmq": "^5.65.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
@@ -40,6 +42,7 @@
     "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
+    "nodemailer": "^7.0.11",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "stripe": "^20.0.0",

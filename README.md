@@ -223,7 +223,7 @@ Webhooks are used to receive real-time payment updates from Stripe and PayPal.
 
 ```
 src/
-├── config/           # Configuration (DB, Redis, Env)
+├── config/           # Configuration (DB, Redis)
 ├── enums/            # TypeScript Enums (Roles, Status)
 ├── interfaces/       # TypeScript Interfaces
 ├── middlewares/      # Express Middlewares (Auth, RateLimit)

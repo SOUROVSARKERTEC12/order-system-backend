@@ -25,12 +25,6 @@ redis.on("connect", () => {
     console.log("✅ Redis connected");
 });
 redis.on("error", (err) => {
-    // Suppress error logs in Vercel if it's just connection failure
-    if (process.env.VERCEL) {
-        console.warn("⚠️ Redis connection failed (expected in Vercel)");
-    }
-    else {
-        console.error("❌ Redis connection error:", err);
-    }
+    console.error("❌ Redis connection error:", err);
 });
 exports.default = redis;

@@ -9,11 +9,7 @@ const getRedisConfig = () => {
     port: Number(process.env.REDIS_PORT) || 6379,
     password: process.env.REDIS_PASSWORD || undefined,
     db: Number(process.env.REDIS_DB) || 0,
-    maxRetriesPerRequest: null,
-    lazyConnect: true, // Important for serverless
-    retryStrategy(times: number) {
-      return Math.min(times * 50, 2000);
-    },
+    maxRetriesPerRequest: null
   };
 };
 

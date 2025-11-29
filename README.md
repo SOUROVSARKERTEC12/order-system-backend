@@ -255,9 +255,42 @@ src/
 
 ## ☁️ Deployment
 
-### Fly.io Deployment (Recommended for Socket.io)
+### Render Deployment (Recommended for Socket.io)
+
+Live link : https://order-system-backend-nqi8.onrender.com/
+
+[Render](https://render.com/) is a unified cloud to build and run all your apps and websites. It supports Node.js and Docker, making it ideal for this application.
+
+1.  **Create a Render Account**
+    -   Sign up at [render.com](https://render.com/).
+
+2.  **Create a New Web Service**
+    -   Click **New +** and select **Web Service**.
+    -   Connect your GitHub/GitLab repository.
+
+3.  **Configure the Service**
+    -   **Name**: `order-system-backend`
+    -   **Region**: Select a region close to your users.
+    -   **Branch**: `main` (or your default branch).
+    -   **Runtime**: `Docker` (recommended, as a `Dockerfile` is provided) OR `Node`.
+        -   *If using Node Runtime*:
+            -   **Build Command**: `yarn install && yarn build`
+            -   **Start Command**: `yarn start`
+        -   *If using Docker Runtime*:
+            -   Render will automatically detect the `Dockerfile` and build the image.
+
+4.  **Environment Variables**
+    -   Go to the **Environment** tab.
+    -   Add all variables from your `.env` file (e.g., `DATABASE_URL`, `REDIS_HOST`, `STRIPE_SECRET_KEY`, etc.).
+    -   **Note**: For Redis, you can create a managed Redis instance on Render and use the internal connection URL.
+
+5.  **Deploy**
+    -   Click **Create Web Service**. Render will start the build and deployment process.
+
+---
+
+## 📝 Additional Notes
 
 -   **Rate Limiting**: Global rate limiting is enabled (100 requests per 15 mins) to prevent abuse.
 -   **Error Handling**: Centralized error handling middleware ensures consistent JSON error responses.
 -   **Socket.io**: Ensure your frontend client connects to the same port as the backend for real-time events.
-```

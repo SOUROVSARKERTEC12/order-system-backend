@@ -1,6 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:8000", {
+const socket = io("https://order-system-backend-nqi8.onrender.com", {
   auth: {
     token:
       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI0YjUxYjYyMi02YjljLTRjODktOGQ5Zi1hN2Y1NDBlYmExNmEiLCJyb2xlIjoidXNlciIsImlhdCI6MTc2NDM3MDM2MiwiZXhwIjoxNzY0NDU2NzYyfQ.CCCR69TE9YOvdIokh86WS2YF8RfofwNvsNLCTjhny14", // replace with a real JWT containing userId

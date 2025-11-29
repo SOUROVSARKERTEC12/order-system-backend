@@ -255,30 +255,9 @@ src/
 
 ## ☁️ Deployment
 
-### Vercel Deployment
-
-This project is configured for deployment on [Vercel](https://vercel.com/).
-
-> [!WARNING]
-> **Socket.io Limitation**: Vercel Serverless Functions are stateless and do not support persistent WebSocket connections. The real-time features of this application (Socket.io) **will not work** as expected on Vercel. For full real-time support, deploy to a VPS (DigitalOcean, AWS EC2) or a platform that supports WebSockets (Render, Heroku, Railway).
-
-1.  **Install Vercel CLI**
-    ```bash
-    npm i -g vercel
-    ```
-
-2.  **Deploy**
-    ```bash
-    vercel
-    ```
-
-3.  **Environment Variables**
-    Add your environment variables in the Vercel Dashboard under **Settings > Environment Variables**.
-
----
-
-## 📝 Additional Notes
+### Fly.io Deployment (Recommended for Socket.io)
 
 -   **Rate Limiting**: Global rate limiting is enabled (100 requests per 15 mins) to prevent abuse.
 -   **Error Handling**: Centralized error handling middleware ensures consistent JSON error responses.
 -   **Socket.io**: Ensure your frontend client connects to the same port as the backend for real-time events.
+```

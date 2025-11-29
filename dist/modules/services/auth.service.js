@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthService = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-const prisma_client_config_1 = __importDefault(require("../../config/prisma.client.config"));
+const prisma_client_config_1 = require("../../config/prisma.client.config");
 const error_handler_1 = require("../../utils/error.handler");
 class AuthService {
     // -----------------------------
@@ -35,11 +35,11 @@ class AuthService {
     // --------------------------------
     async register(payload) {
         const { email, password, role } = payload;
-        const existingUser = await prisma_client_config_1.default.user.findUnique({ where: { email } });
+        const existingUser = await prisma_client_config_1.prisma.user.findUnique({ where: { email } });
         if (existingUser)
             throw new error_handler_1.AppError("User already exists", 400);
         const hashedPassword = await this.hashPassword(password);
-        const user = await prisma_client_config_1.default.user.create({
+        const user = await prisma_client_config_1.prisma.user.create({
             data: {
                 email,
                 password: hashedPassword,
@@ -57,7 +57,7 @@ class AuthService {
     // --------------------------------
     async login(payload) {
         const { email, password } = payload;
-        const user = await prisma_client_config_1.default.user.findUnique({ where: { email } });
+        const user = await prisma_client_config_1.prisma.user.findUnique({ where: { email } });
         if (!user)
             throw new error_handler_1.AppError("Invalid credentials", 401);
         const isValidPassword = await this.verifyPassword(password, user.password);

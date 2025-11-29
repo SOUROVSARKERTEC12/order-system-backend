@@ -1,4 +1,4 @@
-import prisma from "../../config/prisma.client.config";
+import {prisma} from "../../config/prisma.client.config";
 import { CreateOrderInput } from "../../schemas/orders.schema";
 import { SocketService } from "../../socket/socket.service";
 import { OrderStatus } from "../../enums/order.enums";

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PaymentService = void 0;
 const stripe_1 = __importDefault(require("stripe"));
 const axios_1 = __importDefault(require("axios"));
-const prisma_client_config_1 = __importDefault(require("../../config/prisma.client.config"));
+const prisma_client_config_1 = require("../../config/prisma.client.config");
 const error_handler_1 = require("../../utils/error.handler");
 const socket_service_1 = require("../../socket/socket.service");
 const payment_enum_1 = require("../../enums/payment.enum");
@@ -165,7 +165,7 @@ class PaymentService {
         if (!orderId)
             return;
         // 1️⃣ Fetch the current order
-        const order = await prisma_client_config_1.default.order.findUnique({ where: { id: orderId } });
+        const order = await prisma_client_config_1.prisma.order.findUnique({ where: { id: orderId } });
         if (!order)
             return;
         // 2️⃣ Check if any update is needed
@@ -176,7 +176,7 @@ class PaymentService {
             return order; // nothing changed
         }
         // 3️⃣ Update only changed fields
-        const updatedOrder = await prisma_client_config_1.default.order.update({
+        const updatedOrder = await prisma_client_config_1.prisma.order.update({
             where: { id: orderId },
             data: {
                 ...(paymentStatus && { paymentStatus }),

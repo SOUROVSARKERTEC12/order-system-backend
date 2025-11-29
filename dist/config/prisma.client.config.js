@@ -1,8 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.prisma = void 0;
+require("dotenv/config");
 const client_1 = require("@prisma/client");
-const prisma = new client_1.PrismaClient();
-prisma.$connect()
-    .then(() => console.log("Database connect successfully"))
-    .catch((e) => console.error("Database connection failed", e));
-exports.default = prisma;
+const adapter_pg_1 = require("@prisma/adapter-pg");
+// Use PrismaPg adapter with your DATABASE_URL
+const adapter = new adapter_pg_1.PrismaPg({
+    connectionString: process.env.DATABASE_URL,
+});
+exports.prisma = new client_1.PrismaClient({ adapter });
+exports.prisma.$connect()
+    .then(() => console.log('Database connected successfully'))
+    .catch((err) => console.error('Database connection failed', err));

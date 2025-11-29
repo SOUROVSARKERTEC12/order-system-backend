@@ -1,10 +1,7 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderService = void 0;
-const prisma_client_config_1 = __importDefault(require("../../config/prisma.client.config"));
+const prisma_client_config_1 = require("../../config/prisma.client.config");
 const socket_service_1 = require("../../socket/socket.service");
 const order_enums_1 = require("../../enums/order.enums");
 const error_handler_1 = require("../../utils/error.handler");
@@ -50,7 +47,7 @@ class OrderService {
             throw new error_handler_1.AppError("Order must contain at least one item", 400);
         }
         const totalAmount = this.calculateTotal(data.items);
-        const order = await prisma_client_config_1.default.order.create({
+        const order = await prisma_client_config_1.prisma.order.create({
             data: {
                 userId,
                 items: data.items,
@@ -80,13 +77,13 @@ class OrderService {
             return cached;
         }
         const [orders, total] = await Promise.all([
-            prisma_client_config_1.default.order.findMany({
+            prisma_client_config_1.prisma.order.findMany({
                 where: { userId },
                 orderBy: { createdAt: "desc" },
                 skip: options.skip,
                 take: options.take,
             }),
-            prisma_client_config_1.default.order.count({
+            prisma_client_config_1.prisma.order.count({
                 where: { userId },
             }),
         ]);
@@ -99,13 +96,13 @@ class OrderService {
      * Update Order Status + Emit Live Event
      */
     async updateOrderStatus(orderId, orderStatus) {
-        const order = await prisma_client_config_1.default.order.findUnique({
+        const order = await prisma_client_config_1.prisma.order.findUnique({
             where: { id: orderId },
         });
         if (!order) {
             throw new error_handler_1.AppError("Order not found", 404);
         }
-        const updatedOrder = await prisma_client_config_1.default.order.update({
+        const updatedOrder = await prisma_client_config_1.prisma.order.update({
             where: { id: orderId },
             data: {
                 orderStatus, // correctly assign here
@@ -121,7 +118,7 @@ class OrderService {
      */
     async orderEmail(orderId) {
         // 1️⃣ Get order with user info
-        const order = await prisma_client_config_1.default.order.findUnique({
+        const order = await prisma_client_config_1.prisma.order.findUnique({
             where: { id: orderId },
             include: { user: true },
         });

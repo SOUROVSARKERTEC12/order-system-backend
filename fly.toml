@@ -7,7 +7,7 @@ app = "order-system-backend"
 primary_region = "iad"
 
 [deploy]
-  release_command = "npx prisma migrate deploy"
+ release_command = "npx prisma migrate deploy"
 
 [http_service]
   internal_port = 3000

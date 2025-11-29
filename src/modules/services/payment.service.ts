@@ -1,10 +1,11 @@
 import Stripe from "stripe";
 import axios from "axios";
-import prisma from "../../config/prisma.client.config";
+import {prisma} from "../../config/prisma.client.config";
 import { AppError } from "../../utils/error.handler";
 import { SocketService } from "../../socket/socket.service";
 import { PaymentStatus } from "../../enums/payment.enum";
 import { OrderStatus } from "../../enums/order.enums";
+
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 

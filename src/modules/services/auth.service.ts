@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import prisma from "../../config/prisma.client.config";
+import {prisma} from "../../config/prisma.client.config";
 import { AppError } from "../../utils/error.handler";
 import {
   LoginResponse,
